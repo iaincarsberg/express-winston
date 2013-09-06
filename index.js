@@ -151,6 +151,14 @@ function logger(options) {
             meta.req = filterObject(req, requestWhitelist, options.requestFilter);
             meta.res = filterObject(res, responseWhitelist, options.responseFilter);
 
+            if (req._routeWhitelists.resBody === true) {
+                try {
+                    meta.res.body = JSON.parse(chunk);
+                } catch (e) {
+                    meta.res.body = 'returned non-JSON'
+                }
+            }
+
             bodyWhitelist = req._routeWhitelists.body || [];
 
             if (bodyWhitelist) {
