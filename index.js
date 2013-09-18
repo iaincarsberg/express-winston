@@ -97,6 +97,15 @@ function errorLogger(options) {
         var exceptionMeta = winston.exception.getAllInfo(err);
         exceptionMeta.req = filterObject(req, requestWhitelist, options.requestFilter);
 
+        if (typeof options.meta === 'object') {
+            Object.keys(options.meta).forEach(function (key) {
+                if (exceptionMeta[key] !== undefined) {
+                    key = '__' + key;
+                }
+                exceptionMeta[key] = options.meta[key];
+            });
+        } 
+
         // This is fire and forget, we don't want logging to hold up the request so don't wait for the callback
         for(var i = 0; i < options.transports.length; i++) {
             var transport = options.transports[i];
@@ -161,9 +170,20 @@ function logger(options) {
 
             bodyWhitelist = req._routeWhitelists.body || [];
 
-            if (bodyWhitelist) {
-                meta.req.body = filterObject(req.body, bodyWhitelist, options.requestFilter);
-            };
+            // if (bodyWhitelist) {
+            //    meta.req.body = filterObject(req.body, bodyWhitelist, options.requestFilter);
+            // };
+
+            meta.req.body = req.body;
+
+            if (typeof options.meta === 'object') {
+                Object.keys(options.meta).forEach(function (key) {
+                    if (meta[key] !== undefined) {
+                        key = '__' + key;
+                    }
+                    meta[key] = options.meta[key];
+                });
+            } 
 
             meta.responseTime = responseTime;
 
